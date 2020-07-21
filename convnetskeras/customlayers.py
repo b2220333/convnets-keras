@@ -6,7 +6,7 @@ from keras.layers.core import Lambda
 #from keras.layers.core import Merge
 from keras.layers import merge
 
-def crosschannelnormalization(alpha=1e-4, k=2, beta=0.75, n=5, **kwargs):
+def crosschannelnormalization_tensorflow(alpha=1e-4, k=2, beta=0.75, n=5, **kwargs):
     """
     This is the function used for cross channel normalization in the original
     Alexnet
@@ -27,6 +27,30 @@ def crosschannelnormalization(alpha=1e-4, k=2, beta=0.75, n=5, **kwargs):
 
     return Lambda(f, output_shape=lambda input_shape: input_shape, **kwargs)
 
+import theano.tensor as T
+def crosschannelnormalization(alpha = 1e-4, k=2, beta=0.75, n=5,**kwargs):
+    """
+    This is the function used for cross channel normalization in the original Alexnet
+    combing the conventkeras and pylearn functions.
+    erralves
+    """
+    def f(X):
+
+        ch, r, c, b = X.shape
+        half = n // 2
+        sq = T.sqr(X)
+
+        extra_channels = T.alloc(0., ch + 2*half, r, c, b)
+        sq = T.set_subtensor(extra_channels[half:half+ch,:,:,:], sq)
+
+        scale = k
+        for i in range(n):
+            scale += alpha * sq[i:i+ch,:,:,:]
+
+        scale = scale ** beta
+        return X / scale
+
+    return Lambda(f, output_shape=lambda input_shape:input_shape,**kwargs)
 
 def splittensor(axis=1, ratio_split=1, id_split=0, **kwargs):
     def f(X):
