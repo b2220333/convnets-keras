@@ -6,6 +6,7 @@ from keras.layers.core import Lambda
 #from keras.layers.core import Merge
 from keras.layers import merge
 
+#sam edited
 def crosschannelnormalization_tensorflow(alpha=1e-4, k=2, beta=0.75, n=5, **kwargs):
     """
     This is the function used for cross channel normalization in the original
